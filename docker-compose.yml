@@ -11,3 +11,4 @@ services:
 
 volumes:
   eu-data:
+    driver: local

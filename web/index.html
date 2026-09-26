@@ -3,46 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Wireless EU</title>
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0e14'/%3E%3Cpath d='M36 6 14 36h12l-4 22 24-32H33z' fill='%23facc15'/%3E%3C/svg%3E">
+<title>⚡ Wireless EU</title>
 <style>
   :root { --bg:#0b0e14; --card:#141a26; --line:#232c40; --txt:#e8edf5; --dim:#8b96ab;
-          --up:#3ddc84; --down:#ff5d5d; --acc:#38bdf8; }
+          --up:#3ddc84; --down:#ff5d5d; --acc:#38bdf8; --gold:#facc15; }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:var(--txt); font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-         padding:14px; max-width:900px; margin:0 auto; }
-  .hero { background:var(--card); border:1px solid var(--line); border-radius:14px;
-          padding:18px 20px 14px; }
-  .label { color:var(--dim); font-size:12px; letter-spacing:2px; text-transform:uppercase; }
-  .big { font-size:clamp(30px,7vw,52px); font-weight:700; margin:6px 0 2px; word-break:break-all; }
-  .big small { font-size:.45em; color:var(--dim); font-weight:400; }
+  body { background:var(--bg) radial-gradient(1200px 500px at 50% -10%, #16233a 0%, var(--bg) 60%) fixed;
+         color:var(--txt); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+         font-variant-numeric:tabular-nums; padding:14px; max-width:900px; margin:0 auto; }
+  .hero { background:linear-gradient(180deg,#161d2c,#121724); border:1px solid var(--line);
+          border-radius:16px; padding:18px 20px 14px; box-shadow:0 8px 32px rgba(0,0,0,.45); }
+  .label { color:var(--dim); font-size:12px; letter-spacing:2px; text-transform:uppercase;
+           display:flex; align-items:center; gap:8px; }
+  .live { font-size:11px; letter-spacing:1px; padding:2px 10px; border-radius:999px;
+          border:1px solid var(--line); }
+  .live.on { color:var(--up); border-color:rgba(61,220,132,.5); animation:pulse 2s infinite; }
+  .live.stale { color:var(--gold); border-color:rgba(250,204,21,.5); }
+  .live.nodata { color:var(--dim); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  .big { font-size:clamp(32px,7.5vw,54px); font-weight:800; margin:8px 0 2px; word-break:break-all;
+         background:linear-gradient(180deg,#fff,#9adcff); -webkit-background-clip:text;
+         background-clip:text; color:transparent; }
+  .big small { font-size:.42em; font-weight:400; -webkit-text-fill-color:var(--dim); }
   .sub { color:var(--dim); font-size:13px; }
   .row { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-  .pill { flex:1 1 140px; background:#0f1420; border:1px solid var(--line); border-radius:10px;
-          padding:8px 12px; font-size:13px; }
-  .pill b { display:block; font-size:17px; margin-top:2px; }
+  .pill { flex:1 1 140px; background:#0e1320; border:1px solid var(--line);
+          border-left:3px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12px;
+          color:var(--dim); }
+  .pill b { display:block; font-size:17px; margin-top:2px; color:var(--txt); }
+  .pill b.up { color:var(--up); } .pill b.down { color:var(--down); }
   .up { color:var(--up); } .down { color:var(--down); }
   .wins { display:flex; gap:8px; margin:14px 0 10px; flex-wrap:wrap; }
   .wins button { background:var(--card); color:var(--dim); border:1px solid var(--line);
-                 border-radius:8px; padding:7px 14px; font:inherit; font-size:13px; cursor:pointer; }
-  .wins button.on { color:#fff; border-color:var(--acc); background:#16202f; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px;
-          padding:12px; margin-top:10px; }
+                 border-radius:999px; padding:7px 16px; font:inherit; font-size:13px; cursor:pointer; }
+  .wins button.on { color:#fff; border-color:var(--acc); background:#16283a;
+                    box-shadow:0 0 12px rgba(56,189,248,.25); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px;
+          padding:12px; margin-top:10px; box-shadow:0 8px 32px rgba(0,0,0,.35); }
   #chart { width:100%; height:340px; }
   .stats { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; font-size:12px; color:var(--dim); }
-  .stats div { flex:1 1 120px; } .stats b { color:var(--txt); display:block; font-size:14px; }
+  .stats div { flex:1 1 120px; } .stats b { color:var(--txt); display:block; font-size:14px; margin-top:2px; }
   .foot { color:var(--dim); font-size:12px; margin-top:12px; text-align:right; }
   .err { color:var(--down); font-size:13px; margin-top:8px; display:none; }
 </style>
 </head>
 <body>
   <div class="hero">
-    <div class="label">Wireless EU network</div>
+    <div class="label">⚡ Wireless EU network <span id="live" class="live nodata">● NO DATA</span></div>
     <div class="big" id="big">—</div>
     <div class="sub" id="exact">waiting for first sample…</div>
     <div class="row">
-      <div class="pill">EU/t (5m)<b id="eut5">—</b></div>
-      <div class="pill">EU/t (1h)<b id="eut1">—</b></div>
-      <div class="pill">EU/t (24h)<b id="eut24">—</b></div>
+      <div class="pill">EU/t · 5m<b id="eut5">—</b></div>
+      <div class="pill">EU/t · 1h<b id="eut1">—</b></div>
+      <div class="pill">EU/t · 24h<b id="eut24">—</b></div>
     </div>
     <div class="err" id="err"></div>
   </div>
@@ -80,19 +95,27 @@ function rate(s){
   const a = Math.abs(s);
   const f = a >= 1e9 ? (s/1e9).toFixed(2)+"G" : a >= 1e6 ? (s/1e6).toFixed(2)+"M"
         : a >= 1e3 ? (s/1e3).toFixed(1)+"k" : s.toFixed(s !== 0 && a < 10 ? 1 : 0);
-  return [(s > 0 ? "+" : s < 0 ? "−" : "") + f + " EU/t", s > 0 ? "up" : s < 0 ? "down" : ""];
+  return [(s > 0 ? "▲ +" : s < 0 ? "▼ −" : "") + f + " EU/t", s > 0 ? "up" : s < 0 ? "down" : ""];
+}
+function age(s){
+  if (s == null) return "";
+  if (s < 60) return Math.floor(s) + "s ago";
+  if (s < 3600) return Math.floor(s/60) + "m ago";
+  if (s < 86400) return Math.floor(s/3600) + "h ago";
+  return Math.floor(s/86400) + "d ago";
 }
 let win = "24h";
 const chart = echarts.init(document.getElementById("chart"));
 chart.setOption({
   backgroundColor: "transparent",
-  grid: { left: 8, right: 8, top: 24, bottom: 24, containLabel: true },
-  tooltip: { trigger: "axis",
+  grid: { left: 8, right: 8, top: 28, bottom: 24, containLabel: true },
+  tooltip: { trigger: "axis", backgroundColor: "#0e1320", borderColor: "#232c40", textStyle: { color: "#e8edf5" },
     formatter: p => new Date(p[0].value[0]*1000).toLocaleString() + "<br/>" + metric(String(Math.round(p[0].value[1]))) + " EU" },
   xAxis: { type: "time", axisLine: { lineStyle: { color: "#232c40" } }, axisLabel: { color: "#8b96ab", fontSize: 11 } },
   yAxis: { type: "value", scale: true, splitLine: { lineStyle: { color: "#161c29" } },
     axisLabel: { color: "#8b96ab", fontSize: 11, formatter: v => metric(String(Math.round(v))) } },
-  series: [{ type: "line", showSymbol: false, connectNulls: false, lineStyle: { width: 2, color: "#38bdf8" },
+  series: [{ type: "line", showSymbol: false, smooth: 0.15, connectNulls: false,
+    lineStyle: { width: 2.5, color: "#38bdf8", shadowColor: "rgba(56,189,248,.5)", shadowBlur: 12 },
     areaStyle: { color: { type: "linear", x:0, y:0, x2:0, y2:1,
       colorStops: [{ offset:0, color:"rgba(56,189,248,.35)" }, { offset:1, color:"rgba(56,189,248,0)" }] } } }],
   dataZoom: [{ type: "inside" }],
@@ -115,6 +138,10 @@ async function refresh(){
     const [cur, ser] = await Promise.all([
       jget("/api/current"), jget("/api/series?window=" + win + "&points=400")]);
     err.style.display = "none";
+    const live = document.getElementById("live");
+    if (cur.eu == null) { live.textContent = "● NO DATA"; live.className = "live nodata"; }
+    else if (cur.stale) { live.textContent = "● STALE · " + age(cur.age_s); live.className = "live stale"; }
+    else { live.textContent = "● LIVE"; live.className = "live on"; }
     if (cur.eu != null) {
       document.getElementById("big").innerHTML = metric(cur.eu) + " <small>EU</small>";
       document.getElementById("exact").textContent = commas(cur.eu) + " EU";
@@ -123,16 +150,29 @@ async function refresh(){
         el.textContent = t; el.className = c;
       }
       document.getElementById("upd").textContent =
-        "updated " + new Date(cur.ts * 1000).toLocaleTimeString();
+        "sample " + new Date(cur.ts * 1000).toLocaleString();
     }
     if (ser.points.length) {
-      chart.setOption({ series: [{ data: ser.points.map(p => [p[0]*1000, p[1]]) }] });
+      const pts = ser.points.map(p => [p[0]*1000, p[1]]);
+      const last = pts[pts.length-1][1];
+      chart.setOption({ series: [{
+        data: pts,
+        markLine: { silent: true, symbol: "none",
+          lineStyle: { color: "#f472b6", type: "dashed", width: 1 },
+          label: { formatter: "now", color: "#f472b6", fontSize: 10, position: "insideEndTop" },
+          data: [{ yAxis: last }] },
+        markPoint: { silent: true, symbol: "pin", symbolSize: 38,
+          itemStyle: { color: "#facc15" },
+          label: { color: "#000", fontSize: 9, formatter: p => metric(String(Math.round(p.value))) },
+          data: [{ type: "max", name: "peak" }] },
+      }] });
       document.getElementById("smin").textContent = metric(String(Math.round(ser.min))) + " EU";
       document.getElementById("smax").textContent = metric(String(Math.round(ser.max))) + " EU";
       const d = ser.points[ser.points.length-1][1] - ser.points[0][1];
-      const [t, c] = rate(d / Math.max(1, ser.points[ser.points.length-1][0] - ser.points[0][0]));
+      const span = Math.max(1, ser.points[ser.points.length-1][0] - ser.points[0][0]);
+      const [t, c] = rate(d / span);
       const net = document.getElementById("snet");
-      net.textContent = (d >= 0 ? "+" : "−") + metric(String(Math.round(Math.abs(d)))) + " EU (" + t + ")";
+      net.textContent = (d >= 0 ? "▲ +" : "▼ −") + metric(String(Math.round(Math.abs(d)))) + " EU (" + t + ")";
       net.className = c;
       document.getElementById("scnt").textContent = ser.points.length + " buckets";
     }

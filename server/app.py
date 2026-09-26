@@ -27,6 +27,7 @@ DB_PATH = os.path.join(DATA_DIR, "eu.db")
 RAW_DAYS = int(os.environ.get("RAW_DAYS", "90"))
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "web")
 MIN_GAP = 3.0  # min seconds between ingests (OC posts every 10s)
+STALE_AFTER = 90  # seconds without a sample before UI shows STALE (3 missed posts)
 
 DIGITS = re.compile(r"^\d{1,40}$")  # up to 40 digits: covers 9e10 -> 6e22 and beyond
 WINDOWS = {"5m": 300, "1h": 3600, "24h": 86400, "7d": 604800, "30d": 2592000}
@@ -98,10 +99,12 @@ class H(BaseHTTPRequestHandler):
             with dblock:
                 row = db.execute("SELECT ts, eu FROM samples ORDER BY ts DESC LIMIT 1").fetchone()
             if not row:
-                return self._json(200, {"ts": None, "eu": None, "eut_5m": None, "eut_1h": None, "eut_24h": None})
+                return self._json(200, {"ts": None, "eu": None, "eut_5m": None, "eut_1h": None, "eut_24h": None, "age_s": None, "stale": True})
+            now = int(time.time())
             return self._json(200, {
                 "ts": row[0], "eu": row[1],
                 "eut_5m": eut(300), "eut_1h": eut(3600), "eut_24h": eut(86400),
+                "age_s": now - row[0], "stale": now - row[0] > STALE_AFTER,
             })
         if u.path == "/api/series":
             w = q.get("window", ["24h"])[0]

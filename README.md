@@ -38,5 +38,5 @@ Local test: `TOKEN=x PORT=8099 python3 server/app.py`, then
 ## Notes
 
 - EU numbers travel and store as **strings** end-to-end (Lua doubles and Influx ints both lose precision past 2^53 / get finicky — this sidesteps both).
-- Gaps (MC offline, net down) render as gaps, never fake zeros.
+- Gaps (MC offline, net down) render as gaps, never fake zeros. The header badge flips to **STALE · Xm ago** after 90s without a sample; the DB persists in the volume across restarts.
 - Retention: raw 10s samples kept `RAW_DAYS` (default 90d, ~8.6k rows/day — SQLite doesn't care), hourly cleanup, no downsampling needed (chart buckets on read).

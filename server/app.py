@@ -106,6 +106,31 @@ class H(BaseHTTPRequestHandler):
                 "eut_5m": eut(300), "eut_1h": eut(3600), "eut_24h": eut(86400),
                 "age_s": now - row[0], "stale": now - row[0] > STALE_AFTER,
             })
+        if u.path == "/api/stats":
+            # Machine-readable summary: current total + exact per-window deltas + rates.
+            # e.g. /api/stats?windows=5m,1h,24h,7d  (delta is an exact digit string; delta_f is float)
+            req = [w for w in q.get("windows", ["5m,1h,24h,7d"])[0].split(",") if w in WINDOWS] or ["5m", "1h", "24h", "7d"]
+            now = int(time.time())
+            out = {"ts": None, "eu": None, "age_s": None, "stale": True, "windows": {}}
+            with dblock:
+                last = db.execute("SELECT ts, eu FROM samples ORDER BY ts DESC LIMIT 1").fetchone()
+                if last:
+                    out.update({"ts": last[0], "eu": last[1], "age_s": now - last[0],
+                                "stale": now - last[0] > STALE_AFTER})
+                    for w in req:
+                        rows = db.execute(
+                            "SELECT ts, eu FROM samples WHERE ts >= ? ORDER BY ts", (now - WINDOWS[w],)
+                        ).fetchall()
+                        wout = {"span_s": WINDOWS[w], "samples": len(rows), "from_ts": None,
+                                "to_ts": None, "delta": None, "delta_f": None, "eut": None}
+                        if rows:
+                            wout["from_ts"], wout["to_ts"] = rows[0][0], rows[-1][0]
+                        if len(rows) >= 2 and rows[-1][0] > rows[0][0]:
+                            d = int(rows[-1][1]) - int(rows[0][1])
+                            dt = rows[-1][0] - rows[0][0]
+                            wout.update({"delta": str(d), "delta_f": float(d), "eut": d / dt})
+                        out["windows"][w] = wout
+            return self._json(200, out)
         if u.path == "/api/series":
             w = q.get("window", ["24h"])[0]
             try:

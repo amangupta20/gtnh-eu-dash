@@ -1,0 +1,13 @@
+services:
+  eu-dash:
+    build: .
+    environment:
+      TOKEN: ${TOKEN:?set TOKEN in Dokploy env or .env}
+      PORT: 8099
+      RAW_DAYS: ${RAW_DAYS:-90}
+    volumes:
+      - eu-data:/data
+    restart: unless-stopped
+
+volumes:
+  eu-data:

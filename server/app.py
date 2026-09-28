@@ -42,7 +42,8 @@ last_ingest = [0.0]
 
 
 def eut(window_s):
-    """EU/t over trailing window using exact int math. None if <2 samples."""
+    """EU/t over trailing window using exact int math. None if <2 samples.
+    Samples are timestamped in wall-clock seconds; 1 game tick = 1/20s."""
     now = int(time.time())
     with dblock:
         rows = db.execute(
@@ -50,7 +51,7 @@ def eut(window_s):
         ).fetchall()
     if len(rows) < 2 or rows[-1][0] == rows[0][0]:
         return None
-    return (int(rows[-1][1]) - int(rows[0][1])) / (rows[-1][0] - rows[0][0])
+    return (int(rows[-1][1]) - int(rows[0][1])) / ((rows[-1][0] - rows[0][0]) * 20)
 
 
 def cleanup_loop():
@@ -128,7 +129,7 @@ class H(BaseHTTPRequestHandler):
                         if len(rows) >= 2 and rows[-1][0] > rows[0][0]:
                             d = int(rows[-1][1]) - int(rows[0][1])
                             dt = rows[-1][0] - rows[0][0]
-                            wout.update({"delta": str(d), "delta_f": float(d), "eut": d / dt})
+                            wout.update({"delta": str(d), "delta_f": float(d), "eut": d / (dt * 20)})
                         out["windows"][w] = wout
             return self._json(200, out)
         if u.path == "/api/series":
